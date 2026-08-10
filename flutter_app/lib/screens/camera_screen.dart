@@ -1,9 +1,12 @@
-﻿import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import '../services/brightness_service.dart';
-import '../services/vlc_decoder.dart';
-import '../services/id_extractor.dart';
-import '../services/location_service.dart';
+﻿import "package:flutter/material.dart";
+import "package:camera/camera.dart";
+import "../services/brightness_service.dart";
+import "../services/vlc_decoder.dart";
+import "../services/id_extractor.dart";
+import "../services/location_service.dart";
+import "../services/test_result.dart";
+import "../services/results_store.dart";
+import "results_screen.dart";
 
 class CameraScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -18,7 +21,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isInitialized = false;
   double _brightness = 0;
   final VlcDecoder _decoder = VlcDecoder();
-  String _bitstream = '';
+  String _bitstream = "";
   String? _detectedId;
   String? _locationName;
 
@@ -46,6 +49,24 @@ class _CameraScreenState extends State<CameraScreen> {
     });
   }
 
+  void _logReading() {
+    if (_detectedId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No ID detected yet")),
+      );
+      return;
+    }
+    ResultsStore.addResult(TestResult(
+      id: _detectedId!,
+      location: _locationName ?? "Unknown",
+      brightness: _brightness,
+      timestamp: DateTime.now(),
+    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Reading logged")),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -58,6 +79,20 @@ class _CameraScreenState extends State<CameraScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("VLC Indoor Positioning"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ResultsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           CameraPreview(_controller),
@@ -71,56 +106,43 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
           ),
           Positioned(
-            top: 40,
-            left: 20,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.black54,
-              child: Text(
-                'Brightness: ${_brightness.toStringAsFixed(1)}',
-                style: const TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 80,
+            top: 20,
             left: 20,
             right: 20,
             child: Container(
               padding: const EdgeInsets.all(8),
               color: Colors.black54,
               child: Text(
-                'Bits: $_bitstream',
-                style: const TextStyle(color: Colors.greenAccent, fontSize: 14),
-                overflow: TextOverflow.visible,
+                "Brightness: ${_brightness.toStringAsFixed(1)}\nBits: $_bitstream",
+                style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),
           ),
           Positioned(
-            top: 120,
+            bottom: 100,
             left: 20,
+            right: 20,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               color: Colors.black54,
               child: Text(
-                'ID: ${_detectedId ?? "Scanning..."}',
-                style: const TextStyle(color: Colors.yellowAccent, fontSize: 18),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 160,
-            left: 20,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.black54,
-              child: Text(
-                _locationName != null ? 'Location: $_locationName' : 'Location: Unknown',
-                style: const TextStyle(color: Colors.cyanAccent, fontSize: 20, fontWeight: FontWeight.bold),
+                _locationName != null
+                    ? "Location: $_locationName"
+                    : "Location: Scanning...",
+                style: const TextStyle(
+                    color: Colors.cyanAccent,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _logReading,
+        label: const Text("Log Reading"),
+        icon: const Icon(Icons.save),
       ),
     );
   }
