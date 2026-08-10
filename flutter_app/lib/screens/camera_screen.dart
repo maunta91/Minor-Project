@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import '../services/brightness_service.dart';
 import '../services/vlc_decoder.dart';
 import '../services/id_extractor.dart';
+import '../services/location_service.dart';
 
 class CameraScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -19,6 +20,7 @@ class _CameraScreenState extends State<CameraScreen> {
   final VlcDecoder _decoder = VlcDecoder();
   String _bitstream = '';
   String? _detectedId;
+  String? _locationName;
 
   @override
   void initState() {
@@ -35,7 +37,10 @@ class _CameraScreenState extends State<CameraScreen> {
         setState(() {
           _brightness = brightness;
           _bitstream = bits;
-          if (id != null) _detectedId = id;
+          if (id != null) {
+            _detectedId = id;
+            _locationName = LocationService.getLocation(id);
+          }
         });
       });
     });
@@ -100,6 +105,18 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Text(
                 'ID: ${_detectedId ?? "Scanning..."}',
                 style: const TextStyle(color: Colors.yellowAccent, fontSize: 18),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 160,
+            left: 20,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              color: Colors.black54,
+              child: Text(
+                _locationName != null ? 'Location: $_locationName' : 'Location: Unknown',
+                style: const TextStyle(color: Colors.cyanAccent, fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           ),
