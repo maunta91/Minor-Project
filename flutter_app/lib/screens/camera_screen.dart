@@ -95,7 +95,16 @@ class _CameraScreenState extends State<CameraScreen> {
       ),
       body: Stack(
         children: [
-          CameraPreview(_controller),
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _controller.value.previewSize!.height,
+                height: _controller.value.previewSize!.width,
+                child: CameraPreview(_controller),
+              ),
+            ),
+          ),
           Center(
             child: Container(
               width: MediaQuery.of(context).size.width * 0.2,
