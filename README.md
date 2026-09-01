@@ -168,3 +168,37 @@
 
 **- Full evaluation across conditions: In progress**
 
+
+
+**## Screenshots**
+
+
+
+
+
+**\[App Detection](docs/images/app.jpg)**
+
+
+
+**### Test results log**
+
+**\[Results Screen](docs/images/result.jpg)**
+
+
+
+**### Arduino LED transmitter setup**
+
+**\[Arduino Setup](docs/images/setup.jpg)**
+
+**### led**
+
+**\[led setup](docs/images/led.jpg)**
+
+
+
+**\[led1](docs/images/l.jpg)**
+
+
+
+
+
